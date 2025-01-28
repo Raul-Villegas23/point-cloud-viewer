@@ -50,9 +50,9 @@ export class ThreeCubeComponent implements AfterViewInit, OnDestroy {
   }
 
   private createCube(): Mesh {
-    // Create a cube with basic geometry and material
+    // Create a cube with basic geometry and wireframe material
     const geometry = new BoxGeometry(1, 1, 1);
-    const material = new MeshBasicMaterial({ color: 0x00ff00 });
+    const material = new MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
     return new Mesh(geometry, material);
   }
 
