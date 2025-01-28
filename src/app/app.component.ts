@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterModule } from '@angular/router'; // Import RouterModule
+import { ThreeCubeComponent } from './three-cube/three-cube.component';  // Import the ThreeCubeComponent
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,  // Make this component standalone
+  imports: [RouterModule, ThreeCubeComponent],  // Import RouterModule here
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   title = 'point-cloud-viewer';

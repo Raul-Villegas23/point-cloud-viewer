@@ -1,0 +1,28 @@
+/* Make sure the body and html take up the full height and remove any padding/margins */
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;  // Prevent scrolling
+    height: 100%;  // Full height of the screen
+  }
+  
+  /* Style the container that will hold the Three.js canvas */
+  #three-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;  // Center the canvas horizontally
+    align-items: center;      // Center the canvas vertically
+    background-color: #282828; // Dark background for better contrast with the cube
+    position: relative;
+  }
+  
+  /* Optional: Add a shadow effect for the 3D cube */
+  canvas {
+    border-radius: 8px;  // Rounded corners for the canvas
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);  // Subtle shadow to create depth
+    background-color: #000;  // Ensure the background is black for a better contrast
+  }
+  
+  /* Optional: Add styles for the cube (the 3D object) */
+  
