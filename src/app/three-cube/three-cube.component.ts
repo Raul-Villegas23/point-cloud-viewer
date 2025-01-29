@@ -41,6 +41,10 @@ export class ThreeCubeComponent implements AfterViewInit, OnDestroy {
     this.controls.enableDamping = true;  // Smooth movement
     this.controls.dampingFactor = 0.25; // Control smoothness
     this.controls.screenSpacePanning = false;  // Restrict panning to screen space
+    this.controls.maxPolarAngle = Math.PI / 2; // Limit vertical rotation to prevent flipping
+    this.controls.minDistance = 2; // Minimum zoom distance
+    this.controls.maxDistance = 10; // Maximum zoom distance
+    this.controls.zoomSpeed = 1.2; // Control zoom speed
 
     // Start the animation loop
     this.animate();
