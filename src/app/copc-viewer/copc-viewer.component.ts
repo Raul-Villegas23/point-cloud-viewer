@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { Scene, PerspectiveCamera, WebGLRenderer, Color } from 'three';
-import { Potree, PointCloudOctree } from '@pnext/three-loader'; // Make sure you have this installed.
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'; // Import OrbitControls
+import { Component, OnInit, HostListener } from '@angular/core';
+import { Scene, PerspectiveCamera, WebGLRenderer, Color, Vector3 } from 'three';
+import { Potree, PointCloudOctree, ClipMode } from '@pnext/three-loader';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 @Component({
   selector: 'app-copc-viewer',
@@ -13,7 +13,7 @@ export class CopcViewerComponent implements OnInit {
   camera!: PerspectiveCamera;
   renderer!: WebGLRenderer;
   potree!: Potree;
-  controls!: OrbitControls; // Declare controls
+  controls!: OrbitControls;
 
   constructor() { }
 
@@ -22,31 +22,32 @@ export class CopcViewerComponent implements OnInit {
     this.loadPointCloudData();
   }
 
-  // Initialize the 3D scene
   initializeScene() {
     this.scene = new Scene();
     this.camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.camera.position.z = 10;
     this.renderer = new WebGLRenderer();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement); // Attach renderer to the DOM
+    document.body.appendChild(this.renderer.domElement);
     this.scene.background = new Color(0xaaaaaa);
 
-    // Initialize OrbitControls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.update();
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.25;
+    this.controls.screenSpacePanning = false;
+    this.controls.minDistance = 2;
+    this.controls.maxDistance = 10;
+    this.controls.zoomSpeed = 1.2;
 
     this.animate();
   }
 
-  // Load the point cloud data from the external URL
   loadPointCloudData() {
     const baseUrl = 'https://raw.githubusercontent.com/potree/potree/develop/pointclouds/lion_takanawa/';
-    const pointCloudUrl = 'cloud.js'; // External URL
+    const pointCloudUrl = 'cloud.js';
 
-    // Initialize Potree and load the point cloud
     this.potree = new Potree();
-    this.potree.pointBudget = 2_000_000; // Show at most 2 million points
+    this.potree.pointBudget = 2_000_000;
     const pointClouds: PointCloudOctree[] = [];
 
     this.potree.loadPointCloud(
@@ -54,31 +55,34 @@ export class CopcViewerComponent implements OnInit {
       (relativeUrl) => `${baseUrl}${relativeUrl}`
     ).then((pointCloud: PointCloudOctree) => {
       pointClouds.push(pointCloud);
-      this.scene.add(pointCloud); // Add the loaded point cloud to the scene
+      this.scene.add(pointCloud);
 
-      // Customize the point cloud material
+      pointCloud.material.clipMode = ClipMode.CLIP_HORIZONTALLY;
+      pointCloud.material.clipExtent = [0.0, 0.0, 1.0, 1.0];
       pointCloud.material.size = 1.0;
+      pointCloud.material.pointSizeType = 0;
+      // Calculate center of point cloud and set camera position
+      const boundingBox = pointCloud.boundingBox;
+      const center = boundingBox.getCenter(new Vector3());
 
-      // Update camera settings
+      pointCloud.position.set(-center.x, -center.y, -center.z);
+
+      
+
       this.camera.position.set(0, 0, 10);
       this.camera.lookAt(0, 0, 0);
 
-      // Start the animation loop
       this.animate();
     }).catch(error => {
       console.error('Error loading point cloud:', error);
     });
 
-    // Update function to manage point clouds
     const update = () => {
       this.potree.updatePointClouds(pointClouds, this.camera, this.renderer);
-
-      // Render the scene
       this.renderer.clear();
       this.renderer.render(this.scene, this.camera);
     };
 
-    // Call update function in the animation loop
     const animate = () => {
       requestAnimationFrame(animate);
       update();
@@ -87,10 +91,16 @@ export class CopcViewerComponent implements OnInit {
     animate();
   }
 
-  // Animation loop to render the scene
   animate() {
     requestAnimationFrame(() => this.animate());
-    this.controls.update(); // Update controls
+    this.controls.update();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 }
